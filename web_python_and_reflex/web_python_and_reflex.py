@@ -1,38 +1,28 @@
 import reflex as rx
 
 from web_python_and_reflex import style
+from web_python_and_reflex.state import state
 
 
 def qa(question: str, answer: str) -> rx.Component:
     return rx.box(
         rx.box(
-            rx.text(question, style=style.question_style),
-            text_align="right",
+            rx.text(question, text_align="right"),
+            style=style.question_style,
         ),
         rx.box(
-            rx.text(answer, style=style.answer_style),
-            text_align="left",
+            rx.text(answer, text_align="left"),
+            style=style.answer_style,
         ),
-        margin_y="1em",
     )
 
 
 def chat() -> rx.Component:
-    qa_pairs = [
-        (
-            "What is Reflex?",
-            "A way to build web apps in pure Python!",
-        ),
-        (
-            "What can I make with it?",
-            "Anything from a simple website to a complex web app!",
-        ),
-    ]
     return rx.box(
-        *[
-            qa(question, answer)
-            for question, answer in qa_pairs
-        ]
+        rx.foreach(
+            state.chat_history,
+            lambda messages: qa(messages[0], messages[1]),
+        )
     )
 
 
@@ -40,9 +30,15 @@ def action_bar() -> rx.Component:
     return rx.hstack(
         rx.input(
             placeholder="Ask a question",
+            value=state.question,
+            on_change=state.set_question,
             style=style.input_style,
         ),
-        rx.button("Ask", style=style.button_style),
+        rx.button(
+            "Ask",
+            on_click=state.answer,
+            style=style.button_style,
+        ),
     )
 
 
